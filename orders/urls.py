@@ -15,14 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from django.conf.urls.static import static
-from django.conf import settings
-
-admin.autodiscover()
+from landing import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^', include('landing.urls')),
-    url(r'^', include('products.urls')),
-    url(r'^', include('orders.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # url(r'^landing/', views.landing, name='landing'),
+]
