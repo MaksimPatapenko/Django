@@ -21,6 +21,12 @@ class Product(models.Model):
         default=None,
     )
 
+    short_description = models.TextField(
+        blank=True,
+        null=True,
+        default=None,
+    )
+
     created = models.DateTimeField(
         auto_now_add=True,
         auto_now=False,
@@ -29,6 +35,10 @@ class Product(models.Model):
     updated = models.DateTimeField(
         auto_now_add=False,
         auto_now=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
     )
 
     def __str__(self):
@@ -54,6 +64,10 @@ class ProductImage(models.Model):
 
     is_active = models.BooleanField(
         default=True,
+    )
+
+    is_main_img = models.BooleanField(
+        default=False,
     )
 
     created = models.DateTimeField(
