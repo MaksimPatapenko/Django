@@ -9,7 +9,7 @@ html, body{
 }
 
 .general-container{
-    background: url('img/abstract_image.jpg');
+    background: url('../img/abstract_image.jpg');
     height: 100%;
 }
 
