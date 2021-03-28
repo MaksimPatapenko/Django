@@ -9,7 +9,24 @@ def basket_adding(request):
     product_id = data.get("product_id")
     nmb = int(data.get("nmb"))
 
-    new_product = ProductInBasket.objects.create(session_key=session_key, product_id=product_id, number=nmb)
-    products_total_nmb = ProductInBasket.objects.filter(session_key=session_key, is_active=True).count()
+    new_product, created = ProductInBasket.objects.get_or_create(
+        session_key=session_key, product_id=product_id, defaults={"number": nmb}
+    )
+    if not created:
+        new_product.number += nmb
+        new_product.save(force_update=True)
+
+    products_in_basket = ProductInBasket.objects.filter(session_key=session_key, is_active=True)
+    products_total_nmb = products_in_basket.count()
     return_dict["products_total_nmb"] = products_total_nmb
+
+    return_dict["products"] = list()
+
+    for item in products_in_basket:
+        product_dict = dict()
+        product_dict["name"] = item.product.name
+        product_dict["price"] = item.price_per_item
+        product_dict["nmb"] = item.number
+        return_dict["products"].append(product_dict)
+
     return JsonResponse(return_dict)
