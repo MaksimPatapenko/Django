@@ -1,6 +1,8 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
-from .models import ProductInBasket
+from .models import *
+from .forms import CheckoutContactForm
+from django.contrib.auth.models import User
 
 
 def basket_adding(request):
@@ -40,5 +42,36 @@ def basket_adding(request):
 
 def checkout(request):
     session_key = request.session.session_key
-    products_in_basket = ProductInBasket.objects.filter(session_key=session_key, is_active=True)
+    products_in_basket = ProductInBasket.objects.filter(session_key=session_key, is_active=True, order__isnull=True)
+
+    form = CheckoutContactForm(request.POST or None)
+    if request.POST:
+        if form.is_valid():
+            print("Form is valid")
+            data = request.POST
+            name = data.get('name', '')
+            phone = data.get('phone', '')
+            user, created = User.objects.get_or_create(username=phone, defaults={'first_name': name})
+
+            order = Order.objects.create(user=user, customer_name=name, customer_phone=phone, status_id=1)
+
+            for key, value in data.items():
+                if key.startswith('product_in_basket_'):
+                    product_in_basket_id = key.split('product_in_basket_')[1]
+                    product_in_basket = ProductInBasket.objects.get(id=product_in_basket_id)
+
+                    product_in_basket.number = value
+                    products_in_basket.order = order
+                    product_in_basket.save(force_update=True)
+
+                    ProductInOrder.objects.create(
+                        product=product_in_basket.product,
+                        number=product_in_basket.number,
+                        price_per_item=product_in_basket.price_per_item,
+                        total_price=product_in_basket.total_price,
+                        order=order,
+                    )
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        else:
+            print("Form isn't valid")
     return render(request, 'orders/checkout.html', locals())

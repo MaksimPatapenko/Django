@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from products.models import Product
+from django.contrib.auth.models import User
 
 
 class Status(models.Model):
@@ -34,6 +35,13 @@ class Status(models.Model):
 
 
 class Order(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        default=None,
+    )
     total_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -155,7 +163,7 @@ class ProductInOrder(models.Model):
 
     def save(self, *args, **kwargs):
         self.price_per_item = self.product.price
-        self.total_price = self.number * self.price_per_item
+        self.total_price = int(self.number) * self.price_per_item
 
         super(ProductInOrder, self).save(*args, **kwargs)
 
@@ -236,6 +244,6 @@ class ProductInBasket(models.Model):
 
     def save(self, *args, **kwargs):
         self.price_per_item = self.product.price
-        self.total_price = self.number * self.price_per_item
+        self.total_price = int(self.number) * self.price_per_item
 
         super(ProductInBasket, self).save(*args, **kwargs)
